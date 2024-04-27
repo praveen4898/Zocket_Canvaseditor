@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
-
+import { ChromePicker } from 'react-color';
 const styledata = {
   caption: {
     text: "1 & 2 BHK Luxury Apartments at just Rs.34.97Lakhs",
@@ -26,11 +26,13 @@ const styledata = {
 
 function App() {
   const canvasRef = useRef(null);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgQ0wtOo5hGvB2i9EIB6Q4BGAJcm593kDwWg&s");
   const [caption, setCaption] = useState(styledata.caption.text);
   const [ctaText, setCtaText] = useState(styledata.cta.text);
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
-
+  const [pickedColors, setPickedColors] = useState([]);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [initialLaunch, setInitialLaunch] = useState(true);
   useEffect(() => {
     console.log("useEffect triggered");
     const canvas = canvasRef.current;
@@ -125,9 +127,13 @@ context.fillText(CTAText, ctax, ctay);
   const handleCtaTextChange = (event) => {
     setCtaText(event.target.value);
   };
-
-  const handleBackgroundColorChange = (event) => {
-    setBackgroundColor(event.target.value);
+  const handleBackgroundColorChange = (color) => {
+    setBackgroundColor(color.hex);
+    if (initialLaunch) {
+      setInitialLaunch(false);
+    } else {
+      setPickedColors([...pickedColors.slice(-4), color.hex]);
+    }
   };
 
   const handleImageUpload = (event) => {
@@ -142,48 +148,79 @@ context.fillText(CTAText, ctax, ctay);
     }
   };
 
+  const handleColorPick = (color) => {
+    setPickedColors([...pickedColors.slice(-4), color.hex]);
+    setShowColorPicker(false);
+  };
   return (
     <>
-    <div className='flex gap-10 justify-center'>
-            <div>
-        <canvas ref={canvasRef} width={1080} height={1080} ></canvas>
+      <div className='flex justify-around my-12 bg-orange-200'>
+        <div className='border-2 border-black-600 flex justify-center'>
+          <canvas ref={canvasRef} width={1080} height={1080} className="w-3/6"></canvas>
+        </div>
+
+        <div className='flex flex-col border-2 border-black-600 justify-around w-3/6 px-8'>
+          <div>
+            <h2>Choose Image</h2>
+            <input type="file" onChange={handleImageUpload} className='border border-gray-300 rounded-md p-2 w-half' />
+          </div>
+
+          <div>
+            <h2>Choose Caption</h2>
+            <input type="text" placeholder='Enter Caption' value={caption} onChange={handleCaptionChange} className='border border-gray-300 rounded-md p-2 w-half' />
+          </div>
+
+          <div>
+            <h2>Choose CTA</h2>
+            <input type="text" placeholder='Enter CTA' value={ctaText} onChange={handleCtaTextChange} className='border border-gray-300 rounded-md p-2 w-half' />
+          </div>
+
+          <div>
+            <h2>Choose Background color</h2>
+            <input type="color" value={backgroundColor} onChange={(event) => handleBackgroundColorChange(event.target.value)} />
+          </div>
+
+          <div className="mt-4">
+            <h2>Last 5 Picked Colors</h2>
+            <div className="flex">
+              {pickedColors.map((color, index) => (
+                <div
+                  key={index}
+                  className="w-8 h-8 mr-2 cursor-pointer border border-gray-300 rounded-full"
+                  style={{ backgroundColor: color }}
+                  onClick={() => setBackgroundColor(color)}
+                ></div>
+              ))}
+              <button
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                className="w-8 h-8 flex items-center justify-center bg-gray-300 border border-gray-400 rounded-full cursor-pointer"
+              >
+                +
+              </button>
+            </div>
+            {showColorPicker && (
+              <div className="mt-2">
+                <ChromePicker color={backgroundColor} onChangeComplete={handleColorPick} />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-
-
-      <div>
-        <div>
-        <h2>Choose Image</h2>
-
-        <input type="file" onChange={handleImageUpload} />
-        </div>
-       
-       <div>
-       <h2>Choose Caption</h2>
-
-        <input type="text" placeholder='Enter Caption' value={caption} onChange={handleCaptionChange} />
-        </div>
-
-<div>
-<h2>Choose CTA</h2>
-
-        <input type="text" placeholder='Enter CTA' value={ctaText} onChange={handleCtaTextChange} />
-        </div>
-
-
-        <div >
-          <h2>Choose Background color</h2>
-        <input type="color" value={backgroundColor} onChange={handleBackgroundColorChange} />
-        </div>
-      </div>
-
-
-      </div>
-
-    </>
-  )
+    </>  )
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
 
 
 
